@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 	"math/rand"
-	
 
 	crypto "github.com/Altermilk/cryptoMath"
 )

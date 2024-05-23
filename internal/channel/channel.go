@@ -15,29 +15,35 @@ type Channel struct {
 	Snd      snd.Sender
 	que      queue.Queue
 	msgParts []rune
-	p        int32
+	p        int64
 	P int32
 	pr       []rune
 }
 
 func (C *Channel) SetP(rnd *rand.Rand) {
-	C.p = int32(crypto.GetRandomSimpleNum(*rnd))
+	C.p = int64(crypto.GetRandomSimpleNum(*rnd))
 	ps := strconv.FormatInt(int64(C.p), 10)
 	C.pr = []rune(ps)
 	fmt.Println("p = ", C.p, "pr := ", C.pr)
 }
 
 func (C *Channel) SetPrivateKeys(rnd *rand.Rand) {
-	C.Rcv.SetPrivateKeys(rnd, C.p)
-	C.Snd.SetPrivateKeys(rnd, C.p)
+	C.Rcv.SetPrivateKeys(rnd, int32(C.p))
+	C.Snd.SetPrivateKeys(rnd, int32(C.p))
 }
 
 func (C *Channel) CountParts(msg []rune) {
 	pl, msgl := len(C.pr), len(string(msg))
-	t := msgl/pl
-	t_ := msgl - t*pl
-	if t_ > 0{
-		t++
+	var t, t_ int
+	if pl<msgl{
+		t = msgl/pl
+		t_ = msgl - t*pl
+		// if t_ > 0{
+		// 	t++
+		// }
+	}else{
+		t = 1
+		t_ = pl - msgl
 	}
 	
 	n:=0
@@ -72,8 +78,8 @@ func OpenChannel(rName, sName string, rnd *rand.Rand) *Channel {
 }
 
 func (C *Channel) SendPart(msg []rune, rnd *rand.Rand) []rune {
-	C.Snd.SetPrivateKeys(rnd, C.p)
-	C.Rcv.SetPrivateKeys(rnd, C.p)
+	C.Snd.SetPrivateKeys(rnd, int32(C.p))
+	C.Rcv.SetPrivateKeys(rnd, int32(C.p))
 	for i := range msg {
 		C.Snd.SetM(msg[i])
 		C.P = int32(C.pr[i])
