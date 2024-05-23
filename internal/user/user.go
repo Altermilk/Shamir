@@ -14,7 +14,7 @@ type User struct {
 }
 
 type Buffer struct {
-	Buf   int32
+	Buf   rune
 	Runes []rune
 }
 
@@ -22,7 +22,7 @@ func (b *Buffer) ClearBuf() {
 	b.Buf = 0 // Set the value of the Buffer to 0 to clear it.
 }
 
-func (b *Buffer) Put(data int32) {
+func (b *Buffer) Put(data rune) {
 	b.Buf = data // Assign the value of data to the Buffer.
 }
 
@@ -42,13 +42,13 @@ func (u *User) SetPrivateKeys(rnd *rand.Rand, p int32) {
 
 func CountC(p int32, rnd *rand.Rand) int32 {
 	for {
-		C := rnd.Intn(int(p)-1)
-		if D, _, _ := crypto.Gcd(C, int(p-1)); D == 1 && C>1{
-			return int32(C)
+		C := rnd.Int31n(p)
+		
+		if D, _, _ := crypto.GcdRunes(C, p-1); D == 1{
+			return C
 		}
 	}
 }
-
 func CountD(C, p int32) int32 {
-	return int32(crypto.ModInv(int(C), int(p)))
+	return crypto.ModInvRunes(C, p-1)
 }

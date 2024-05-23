@@ -1,4 +1,6 @@
 github.com/Altermilk/cryptoMath v0.0.0-20240518232842-f9a6e2ee58a2 h1:FuiGf0Ar/8rcnwQJQ0xkUFYAD2Kp6io9gnkDohKkczc=
 github.com/Altermilk/cryptoMath v0.0.0-20240518232842-f9a6e2ee58a2/go.mod h1:JIDZn882Xpm5TOAE9snIB29+3JPMpS3pph9J4BApfZE=
+github.com/Altermilk/cryptoMath v0.0.0-20240523084221-359bbd0fd218 h1:oXKaCXlEN7P4Kc1q70vrESWngr072d8aIVsLZ/dclpw=
+github.com/Altermilk/cryptoMath v0.0.0-20240523084221-359bbd0fd218/go.mod h1:JIDZn882Xpm5TOAE9snIB29+3JPMpS3pph9J4BApfZE=
 github.com/go-datastructures/go-datastructures v1.0.50 h1:IAzjbaA7e4OK/uWiNnV24YRB+GhbJSTLGsrvZh6c4RI=
 github.com/go-datastructures/go-datastructures v1.0.50/go.mod h1:QANn4AEpxH7sJkdjaHeNTopZZWfuqMOj2Vg5COMPUcM=

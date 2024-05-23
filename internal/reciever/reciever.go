@@ -10,12 +10,12 @@ type Reciever struct {
 }
 
 func (r *Reciever) CountX2(p int32, sBuf *usr.Buffer) {
-	sBuf.Put(int32(crypto.Modularizate(int(r.Buf.Buf), int(r.C), int(p))))
+	sBuf.Put(crypto.ModularizateRune(r.Buf.Buf, r.C, p))
 	r.Buf.ClearBuf()
 }
 
 func (r *Reciever) CountX4(p int32) {
-	r.Buf.Put(int32(crypto.Modularizate(int(r.Buf.Buf), int(r.D), int(p))))
+	r.Buf.Put(crypto.ModularizateRune(r.Buf.Buf, r.D, p))
 	r.Buf.PutRunes()
 	r.Buf.ClearBuf()
 }

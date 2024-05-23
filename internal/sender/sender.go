@@ -14,6 +14,7 @@ type Sender struct {
 
 func (s *Sender) MakeMsg(msg string) {
 	s.Buf.Runes = []rune(msg)
+	fmt.Println("[ " + msg + " ] ------------>")
 	fmt.Println("msg: ", s.Buf.Runes)
 }
 
@@ -22,10 +23,10 @@ func (s *Sender) SetM(r rune) {
 }
 
 func (s *Sender) CountX1(p int32, rBuf *usr.Buffer) {
-	rBuf.Put(int32(crypto.Modularizate(int(s.m), int(s.C), int(p))))
+	rBuf.Put(crypto.ModularizateRune(s.m, s.C, p))
 }
 
 func (s *Sender) CountX3(p int32, rBuf *usr.Buffer) {
-	rBuf.Put(int32(crypto.Modularizate(int(s.Buf.Buf), int(s.D), int(p))))
+	rBuf.Put(crypto.ModularizateRune(s.Buf.Buf, s.D, p))
 	s.Buf.ClearBuf()
 }

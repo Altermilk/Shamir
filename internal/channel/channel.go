@@ -3,7 +3,7 @@ package channel
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
+
 	rcv "shamir/internal/reciever"
 	snd "shamir/internal/sender"
 	crypto "github.com/Altermilk/cryptoMath"
@@ -15,50 +15,61 @@ type Channel struct {
 	Snd      snd.Sender
 	que      queue.Queue
 	msgParts []rune
-	p        int64
 	P int32
-	pr       []rune
 }
 
 func (C *Channel) SetP(rnd *rand.Rand) {
-	C.p = int64(crypto.GetRandomSimpleNum(*rnd))
-	ps := strconv.FormatInt(int64(C.p), 10)
-	C.pr = []rune(ps)
-	fmt.Println("p = ", C.p, "pr := ", C.pr)
+	C.P = rune(crypto.GetRandomSimpleNum(*rnd))
 }
 
 func (C *Channel) SetPrivateKeys(rnd *rand.Rand) {
-	C.Rcv.SetPrivateKeys(rnd, int32(C.p))
-	C.Snd.SetPrivateKeys(rnd, int32(C.p))
+	C.Rcv.SetPrivateKeys(rnd, C.P)
+	C.Snd.SetPrivateKeys(rnd, C.P)
 }
 
 func (C *Channel) CountParts(msg []rune) {
-	pl, msgl := len(C.pr), len(string(msg))
-	var t, t_ int
-	if pl<msgl{
-		t = msgl/pl
-		t_ = msgl - t*pl
-		// if t_ > 0{
-		// 	t++
-		// }
-	}else{
-		t = 1
-		t_ = pl - msgl
+	msgl := len(msg)
+	t_ := 0
+	t := msgl
+	F := false
+	if msgl>2 && msgl%2!=0{
+		t_ ++
+		msgl --
+		F = true
 	}
+	
+	size := 1
+	for {
+		if t%2 == 0{
+			size *=2
+			t /= 2
+		}else{
+			t = msgl/size
+			t_ += msgl - t*size
+			break
+		}
+	}
+	
 	
 	n:=0
 	for i := 0; i < t; i++ {
-		size := 0
-		if msgl>=pl{
-			if n <= t*pl{
-				size = pl
-			}else{
-				size = t_
-			}
+		sizeP := 0
+		if msgl - size*i < size{
+			break
 		}else{
-			size = pl - msgl
+			sizeP = size
 		}
-		m := make([]rune, size)
+		m := make([]rune, sizeP)
+		for j := 0; j < size; j++ {
+			m[j] = msg[n]
+			n++
+		}
+		C.que.Put(m)
+	}
+	if F{
+		msgl++
+		sizeP := msgl - n*size
+		m := make([]rune, sizeP)
 		for j := 0; j < size; j++ {
 			m[j] = msg[n]
 			n++
@@ -74,15 +85,15 @@ func OpenChannel(rName, sName string, rnd *rand.Rand) *Channel {
 	C.Snd = snd.Sender{}
 	C.Rcv.Name, C.Snd.Name = rName, sName
 	C.que = *queue.New(100)
+	fmt.Println("P = ", C.P)
 	return &C
 }
 
 func (C *Channel) SendPart(msg []rune, rnd *rand.Rand) []rune {
-	C.Snd.SetPrivateKeys(rnd, int32(C.p))
-	C.Rcv.SetPrivateKeys(rnd, int32(C.p))
+	C.Snd.SetPrivateKeys(rnd, C.P)
+	C.Rcv.SetPrivateKeys(rnd, C.P)
 	for i := range msg {
 		C.Snd.SetM(msg[i])
-		C.P = int32(C.pr[i])
 		C.Snd.CountX1(C.P, &C.Rcv.Buf)
 		C.Rcv.CountX2(C.P, &C.Snd.Buf)
 		C.Snd.CountX3(C.P, &C.Rcv.Buf)
@@ -101,17 +112,17 @@ func (C *Channel) Send(rnd *rand.Rand) {
 		if !ok {
 		  panic("Unexpected type in queue")
 		}
-		fmt.Println("> msg part: ", msgPartRunes)
+		fmt.Println("\n> msg part: ", msgPartRunes)
 		C.msgParts = append(C.msgParts, C.SendPart(msgPartRunes, rnd)...)
 		C.que.Get(1) // Удалить элемент из очереди здесь
 	
 		if(C.que.Len() == 0){ // Проверить длину очереди здесь
 		  break
 		}
+		
 		fmt.Println(">> Decoded part: ", C.msgParts)
 		C.Rcv.Buf.ClearRunes()
-		fmt.Println(C.que.Len())
 	  }
 	
-	fmt.Println(string(C.msgParts))
+	fmt.Println("\n---------> [ " + string(C.msgParts) + " ]")
 }
